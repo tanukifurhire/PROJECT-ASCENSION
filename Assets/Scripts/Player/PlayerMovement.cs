@@ -83,7 +83,6 @@ public class PlayerMovement : MonoBehaviour
             moveVelClampDown = -1;
             moveVelClampUp = 1;
         }
-        Debug.Log(moveVelClampDown);
     }
 
     private void FixedUpdate()
@@ -93,15 +92,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void RotatePlayer()
     {
-        Vector3 facingDirection = new Vector3(MovementInput.x, 0f, 0f).normalized;
-        Vector3 movementDirection = new Vector3(0f, MovementInput.y, 0f).normalized;
+        Vector3 facingDirection = new Vector3(MovementInput.x, 0f, 0.5f);
+        Vector3 movementDirection = new Vector3(1f, MovementInput.y, 0f);
         Rotate(facingDirection);
         RotateX(movementDirection);
         RotateTowardsTargetRotation();
         Vector3 currentPlayerHorizontalVelocity = GetPlayerHorizontalVelocity();
         moveVel = transform.forward;
-        //moveVel += transform.up * Mathf.Clamp(MovementInput.y, moveVelClampDown, moveVelClampUp) * .5f;
-        rb.AddForce(moveVel * 5f - currentPlayerHorizontalVelocity, ForceMode.VelocityChange);
+        //moveVel += transform.up * Mathf.Clamp(MovementInput.y, moveVelClampDown, moveVelClampUp) * 2f;
+        rb.AddForce(moveVel * 5f - currentPlayerHorizontalVelocity, ForceMode.Impulse);
     }
     protected Vector3 GetPlayerHorizontalVelocity()
     {
@@ -173,8 +172,7 @@ public class PlayerMovement : MonoBehaviour
     }
     private float GetDirectionXAngle(Vector3 direction)
     {
-        float directionAngle = Mathf.Atan2(direction.y, direction.z) * Mathf.Rad2Deg;
-        
+        float directionAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         return directionAngle;
     }
     private float AddCameraRotationToAngle(float angle)
@@ -188,7 +186,7 @@ public class PlayerMovement : MonoBehaviour
     }
     private float AddCameraXRotationToAngle(float angle)
     {
-        angle += MainCameraTransform.eulerAngles.x;
+        angle -= MainCameraTransform.eulerAngles.x;
         
         return angle;
     }
@@ -214,5 +212,7 @@ public class PlayerMovement : MonoBehaviour
     private void ReadMovementInput()
     {
         MovementInput = new Vector2(Input.PlayerActions.Look.ReadValue<Vector2>().x, -Input.PlayerActions.Look.ReadValue<Vector2>().y).normalized;
+
+        Debug.Log(MovementInput.y);
     }
 }
