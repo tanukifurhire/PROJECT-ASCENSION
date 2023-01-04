@@ -83,7 +83,6 @@ public class PlayerMovement : MonoBehaviour
             moveVelClampUp = 1;
         }
         Debug.Log(moveVelClampDown);
-        //transform.LookAt(target.transform);
     }
 
     private void FixedUpdate()
@@ -93,14 +92,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void RotatePlayer()
     {
-        Vector3 movementDirection = new Vector3(MovementInput.x, 0f, Mathf.Abs(MovementInput.y)).normalized;
-
-        Rotate(movementDirection);
+        Vector3 facingDirection = new Vector3(MovementInput.x, 0f, 0f).normalized;
+        Vector3 movementDirection = new Vector3(0f, 0f, MovementInput.y).normalized;
+        Rotate(facingDirection);
+        RotateX(movementDirection);
         RotateTowardsTargetRotation();
         Vector3 currentPlayerHorizontalVelocity = GetPlayerHorizontalVelocity();
         moveVel = transform.forward;
         //moveVel += transform.up * Mathf.Clamp(MovementInput.y, moveVelClampDown, moveVelClampUp) * .5f;
-        rb.AddForce(moveVel * 5f - currentPlayerHorizontalVelocity, ForceMode.VelocityChange);
+        //rb.AddForce(moveVel * 5f - currentPlayerHorizontalVelocity, ForceMode.VelocityChange);
     }
     protected Vector3 GetPlayerHorizontalVelocity()
     {
@@ -120,6 +120,11 @@ public class PlayerMovement : MonoBehaviour
         float directionAngle = UpdateTargetRotation(direction);
         return directionAngle;
     }
+    private float RotateX(Vector3 direction)
+    {
+        float directionAngle = UpdateTargetXRotation(direction);
+        return directionAngle;
+    }
     private float UpdateTargetRotation(Vector3 direction, bool shouldConsiderCameraRotation = true)
     {
         float directionAngle = GetDirectionAngle(direction);
@@ -134,10 +139,29 @@ public class PlayerMovement : MonoBehaviour
          
         return directionAngle;
     }
+    private float UpdateTargetXRotation(Vector3 direction, bool shouldConsiderCameraRotation = true)
+    {
+        float directionAngle = GetDirectionXAngle(direction);
+        if (shouldConsiderCameraRotation)
+        {
+            directionAngle = AddCameraXRotationToAngle(directionAngle);
+        }
+        if (directionAngle != CurrentTargetRotation.x)
+        {
+            UpdateTargetXRotationData(directionAngle);
+        }
+
+        return directionAngle;
+    }
     private void UpdateTargetRotationData(float targetAngle)
     {
         CurrentTargetRotation.y = targetAngle;
         DampedTargetRotationPassedTime.y = 0f;
+    }
+    private void UpdateTargetXRotationData(float targetAngle)
+    {
+        CurrentTargetRotation.x = targetAngle;
+        DampedTargetRotationPassedTime.x = 0f;
     }
     private float GetDirectionAngle(Vector3 direction)
     {
@@ -146,6 +170,12 @@ public class PlayerMovement : MonoBehaviour
         {
             directionAngle += 360f;
         }
+        return directionAngle;
+    }
+    private float GetDirectionXAngle(Vector3 direction)
+    {
+        float directionAngle = Mathf.Atan2(direction.y, direction.z) * Mathf.Rad2Deg;
+        
         return directionAngle;
     }
     private float AddCameraRotationToAngle(float angle)
@@ -157,9 +187,19 @@ public class PlayerMovement : MonoBehaviour
         }
         return angle;
     }
+    private float AddCameraXRotationToAngle(float angle)
+    {
+        angle += MainCameraTransform.eulerAngles.x;
+        if (angle > 360f)
+        {
+            angle -= 360f;
+        }
+        return angle;
+    }
     private void RotateTowardsTargetRotation()
     {
         float currentYAngle = rb.rotation.eulerAngles.y;
+        float currentXAngle = rb.rotation.eulerAngles.x;
 
         if (currentYAngle == CurrentTargetRotation.y)
         {
@@ -168,8 +208,10 @@ public class PlayerMovement : MonoBehaviour
 
         float smoothedYAngle = Mathf.SmoothDampAngle(currentYAngle, CurrentTargetRotation.y, ref DampedTargetRotationCurrentVelocity.y, timeToReachTargetRotation.y - DampedTargetRotationPassedTime.y);
         DampedTargetRotationPassedTime.y += Time.deltaTime;
+        float smoothedXAngle = Mathf.SmoothDampAngle(currentXAngle, CurrentTargetRotation.x, ref DampedTargetRotationCurrentVelocity.x, timeToReachTargetRotation.y - DampedTargetRotationPassedTime.x);
+        DampedTargetRotationPassedTime.x += Time.deltaTime;
 
-        Quaternion targetRotation = Quaternion.Euler(0f, smoothedYAngle, 0f);
+        Quaternion targetRotation = Quaternion.Euler(smoothedXAngle * 0.4f, smoothedYAngle, 0f);
         rb.MoveRotation(targetRotation);
     }
 
