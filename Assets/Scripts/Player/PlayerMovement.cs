@@ -57,6 +57,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         timeToReachTargetRotation.y = 0.14f;
+        timeToReachTargetRotation.x = 0.3f;
         Cursor.lockState = CursorLockMode.Locked;
     }
 
@@ -93,20 +94,18 @@ public class PlayerMovement : MonoBehaviour
     private void RotatePlayer()
     {
         Vector3 facingDirection = new Vector3(MovementInput.x, 0f, 0f).normalized;
-        Vector3 movementDirection = new Vector3(0f, 0f, MovementInput.y).normalized;
+        Vector3 movementDirection = new Vector3(0f, MovementInput.y, 0f).normalized;
         Rotate(facingDirection);
         RotateX(movementDirection);
         RotateTowardsTargetRotation();
         Vector3 currentPlayerHorizontalVelocity = GetPlayerHorizontalVelocity();
         moveVel = transform.forward;
         //moveVel += transform.up * Mathf.Clamp(MovementInput.y, moveVelClampDown, moveVelClampUp) * .5f;
-        //rb.AddForce(moveVel * 5f - currentPlayerHorizontalVelocity, ForceMode.VelocityChange);
+        rb.AddForce(moveVel * 5f - currentPlayerHorizontalVelocity, ForceMode.VelocityChange);
     }
     protected Vector3 GetPlayerHorizontalVelocity()
     {
         Vector3 playerHorizontalVelocity = rb.velocity;
-
-        playerHorizontalVelocity.y = 0f;
 
         return playerHorizontalVelocity;
     }
@@ -139,7 +138,7 @@ public class PlayerMovement : MonoBehaviour
          
         return directionAngle;
     }
-    private float UpdateTargetXRotation(Vector3 direction, bool shouldConsiderCameraRotation = true)
+    private float UpdateTargetXRotation(Vector3 direction, bool shouldConsiderCameraRotation = false)
     {
         float directionAngle = GetDirectionXAngle(direction);
         if (shouldConsiderCameraRotation)
@@ -190,10 +189,7 @@ public class PlayerMovement : MonoBehaviour
     private float AddCameraXRotationToAngle(float angle)
     {
         angle += MainCameraTransform.eulerAngles.x;
-        if (angle > 360f)
-        {
-            angle -= 360f;
-        }
+        
         return angle;
     }
     private void RotateTowardsTargetRotation()
@@ -208,15 +204,15 @@ public class PlayerMovement : MonoBehaviour
 
         float smoothedYAngle = Mathf.SmoothDampAngle(currentYAngle, CurrentTargetRotation.y, ref DampedTargetRotationCurrentVelocity.y, timeToReachTargetRotation.y - DampedTargetRotationPassedTime.y);
         DampedTargetRotationPassedTime.y += Time.deltaTime;
-        float smoothedXAngle = Mathf.SmoothDampAngle(currentXAngle, CurrentTargetRotation.x, ref DampedTargetRotationCurrentVelocity.x, timeToReachTargetRotation.y - DampedTargetRotationPassedTime.x);
+        float smoothedXAngle = Mathf.SmoothDampAngle(currentXAngle, CurrentTargetRotation.x, ref DampedTargetRotationCurrentVelocity.x, timeToReachTargetRotation.x - DampedTargetRotationPassedTime.x);
         DampedTargetRotationPassedTime.x += Time.deltaTime;
 
-        Quaternion targetRotation = Quaternion.Euler(smoothedXAngle * 0.4f, smoothedYAngle, 0f);
+        Quaternion targetRotation = Quaternion.Euler(smoothedXAngle, smoothedYAngle, 0f);
         rb.MoveRotation(targetRotation);
     }
 
     private void ReadMovementInput()
     {
-        MovementInput = new Vector2(Input.PlayerActions.Look.ReadValue<Vector2>().x, Input.PlayerActions.Look.ReadValue<Vector2>().y).normalized;
+        MovementInput = new Vector2(Input.PlayerActions.Look.ReadValue<Vector2>().x, -Input.PlayerActions.Look.ReadValue<Vector2>().y).normalized;
     }
 }
