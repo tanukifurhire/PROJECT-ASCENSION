@@ -10,6 +10,8 @@ public class PlayerMovement : MonoBehaviour
     public Vector2 MovementInput { get; private set; }
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform target;
+    private Vector2 currentInputVector;
+    private Vector2 smoothVectorVelocity;
     public Transform MainCameraTransform { get; private set; }
     private Vector3 currentTargetRotation;
     private Vector3 timeToReachTargetRotation;
@@ -92,8 +94,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void RotatePlayer()
     {
-        Vector3 facingDirection = new Vector3(MovementInput.x, 0f, 0.5f);
-        Vector3 movementDirection = new Vector3(1f, MovementInput.y, 0f);
+        currentInputVector = Vector2.SmoothDamp(currentInputVector, MovementInput, ref smoothVectorVelocity, 0.3f);
+        Vector3 facingDirection = new Vector3(currentInputVector.x, 0f, 0.002f);
+        Vector3 movementDirection = new Vector3(0.006f, currentInputVector.y, 0f);
         Rotate(facingDirection);
         RotateX(movementDirection);
         RotateTowardsTargetRotation();
@@ -211,7 +214,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void ReadMovementInput()
     {
-        MovementInput = new Vector2(Input.PlayerActions.Look.ReadValue<Vector2>().x, -Input.PlayerActions.Look.ReadValue<Vector2>().y).normalized;
+        MovementInput = new Vector2(Input.PlayerActions.Look.ReadValue<Vector2>().x, -Input.PlayerActions.Look.ReadValue<Vector2>().y).normalized * Time.deltaTime;
 
         Debug.Log(MovementInput.y);
     }
