@@ -12,6 +12,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform target;
     private Vector2 currentInputVector;
     private Vector2 smoothVectorVelocity;
+    private Vector2 screenPosition;
+    private Vector2 centeredScreenPosition;
+    [SerializeField] private Transform centerOfMass;
     public Transform MainCameraTransform { get; private set; }
     private Vector3 currentTargetRotation;
     private Vector3 timeToReachTargetRotation;
@@ -60,7 +63,8 @@ public class PlayerMovement : MonoBehaviour
     {
         timeToReachTargetRotation.y = 0.14f;
         timeToReachTargetRotation.x = 0.3f;
-        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = false;
     }
 
     // Update is called once per frame
@@ -94,16 +98,18 @@ public class PlayerMovement : MonoBehaviour
 
     private void RotatePlayer()
     {
-        currentInputVector = Vector2.SmoothDamp(currentInputVector, MovementInput, ref smoothVectorVelocity, 0.3f);
-        Vector3 facingDirection = new Vector3(currentInputVector.x, 0f, 0.002f);
-        Vector3 movementDirection = new Vector3(0.006f, currentInputVector.y, 0f);
-        Rotate(facingDirection);
-        RotateX(movementDirection);
-        RotateTowardsTargetRotation();
+        currentInputVector = Vector2.SmoothDamp(currentInputVector, centeredScreenPosition, ref smoothVectorVelocity, .1f);
+        Debug.Log(currentInputVector);
         Vector3 currentPlayerHorizontalVelocity = GetPlayerHorizontalVelocity();
         moveVel = transform.forward;
-        //moveVel += transform.up * Mathf.Clamp(MovementInput.y, moveVelClampDown, moveVelClampUp) * 2f;
-        rb.AddForce(moveVel * 5f - currentPlayerHorizontalVelocity, ForceMode.Impulse);
+        rb.AddForce(moveVel * 5f - currentPlayerHorizontalVelocity, ForceMode.VelocityChange);
+        rb.angularVelocity += -Vector3.up * GetAngularAcceleration() * Time.fixedDeltaTime;
+        rb.angularVelocity += transform.right * (currentInputVector.y * 5000 * Mathf.PI / 180) * Time.fixedDeltaTime;
+        rb.rotation *= Quaternion.Euler(0f,0f,-transform.localEulerAngles.z);
+    }
+    float GetAngularAcceleration()
+    {
+        return -currentInputVector.x * 9000 * Mathf.PI / 180;
     }
     protected Vector3 GetPlayerHorizontalVelocity()
     {
@@ -208,14 +214,13 @@ public class PlayerMovement : MonoBehaviour
         float smoothedXAngle = Mathf.SmoothDampAngle(currentXAngle, CurrentTargetRotation.x, ref DampedTargetRotationCurrentVelocity.x, timeToReachTargetRotation.x - DampedTargetRotationPassedTime.x);
         DampedTargetRotationPassedTime.x += Time.deltaTime;
 
-        Quaternion targetRotation = Quaternion.Euler(smoothedXAngle, smoothedYAngle, 0f);
+        Quaternion targetRotation = Quaternion.Euler(smoothedXAngle, 0f, 0f);
         rb.MoveRotation(targetRotation);
     }
 
     private void ReadMovementInput()
     {
-        MovementInput = new Vector2(Input.PlayerActions.Look.ReadValue<Vector2>().x, -Input.PlayerActions.Look.ReadValue<Vector2>().y).normalized * Time.deltaTime;
-
-        Debug.Log(MovementInput.y);
+        screenPosition = new Vector2(Mathf.Clamp(Mouse.current.position.ReadValue().x / Screen.height, 0, 1), Mathf.Clamp(Mouse.current.position.ReadValue().y / Screen.height, 0, 1));
+        centeredScreenPosition = new Vector2(Mouse.current.delta.ReadValue().x, -Mouse.current.delta.ReadValue().y * .2f).normalized;
     }
 }
