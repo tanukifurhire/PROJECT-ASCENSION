@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.30692244, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -500,15 +500,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa7155796051b734daa718462081dc5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BindingMode: 2
+  m_BindingMode: 3
   m_FollowOffset: {x: 0, y: 0, z: -8}
-  m_XDamping: 1
-  m_YDamping: 1
+  m_XDamping: 0
+  m_YDamping: 0
   m_ZDamping: 1
   m_AngularDampingMode: 0
-  m_PitchDamping: 0
+  m_PitchDamping: 1
   m_YawDamping: 2
-  m_RollDamping: 0
+  m_RollDamping: 2
   m_AngularDamping: 0
 --- !u!114 &490573179
 MonoBehaviour:

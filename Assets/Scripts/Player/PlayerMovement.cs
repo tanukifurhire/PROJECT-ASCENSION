@@ -104,7 +104,7 @@ public class PlayerMovement : MonoBehaviour
         moveVel = transform.forward;
         rb.AddForce(moveVel * 5f - currentPlayerHorizontalVelocity, ForceMode.VelocityChange);
         rb.angularVelocity += -Vector3.up * GetAngularAcceleration() * Time.fixedDeltaTime;
-        rb.angularVelocity += transform.right * (currentInputVector.y * 5000 * Mathf.PI / 180) * Time.fixedDeltaTime;
+        rb.angularVelocity += transform.right * (currentInputVector.y * 13000 * Mathf.PI / 180) * Time.fixedDeltaTime;
         rb.rotation *= Quaternion.Euler(0f,0f,-transform.localEulerAngles.z);
     }
     float GetAngularAcceleration()
@@ -221,6 +221,6 @@ public class PlayerMovement : MonoBehaviour
     private void ReadMovementInput()
     {
         screenPosition = new Vector2(Mathf.Clamp(Mouse.current.position.ReadValue().x / Screen.height, 0, 1), Mathf.Clamp(Mouse.current.position.ReadValue().y / Screen.height, 0, 1));
-        centeredScreenPosition = new Vector2(Mouse.current.delta.ReadValue().x, -Mouse.current.delta.ReadValue().y * .2f).normalized;
+        centeredScreenPosition = new Vector2(Input.PlayerActions.Look.ReadValue<Vector2>().x, -Input.PlayerActions.Look.ReadValue<Vector2>().y * .2f);
     }
 }
