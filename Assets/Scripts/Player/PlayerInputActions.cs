@@ -39,6 +39,20 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
             ],
             ""bindings"": [
                 {
+<<<<<<< HEAD
+=======
+                    ""name"": """",
+                    ""id"": ""a20e5ed9-48ba-4546-bd0d-ecb6dc30f6f8"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+>>>>>>> parent of 2edb4ee (270123 Commit)
                     ""name"": ""WASD"",
                     ""id"": ""bc06c4df-9613-4788-b457-a3d3f3f03ee3"",
                     ""path"": ""2DVector"",
